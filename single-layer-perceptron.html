@@ -1,0 +1,71 @@
+<html>
+<head>
+    <script src="perceptron.js" type="text/javascript"></script>
+    <script>
+    var train = function(){
+        console.log('Started training...');
+        var randomWeightStrength = new NaturalIntelligence.RandomWeightStrengthFactory({
+            startRange : 0,
+            endRange : 1
+        });
+
+        var settings = {
+            inputUnits : 2,
+            outputUnits: 1,
+            //By default all weights in the SLP are initialized to 0
+            weightStrengthCreator: function () { return 0; },
+        };
+
+        var trainer = NaturalIntelligence.PerceptronTrainingFactory.create(settings);
+        var perceptron = trainer.perceptron;
+        
+        var weightChanger = new NaturalIntelligence.PerceptronRuleWeightChanger(settings);
+        weightChanger.learningConstant = 0.1;
+
+        var thousandCycles = 0;
+        trainer.learningRule = new NaturalIntelligence.PerceptronRule(trainer.perceptron, function () {
+            thousandCycles++;
+            return thousandCycles == 100;
+        }, 1000);
+        trainer.learningRule.errorMax = 0.01;
+        trainer.learningRule.weightChanger = weightChanger;
+
+        trainer.train(getAndExemplars());
+        document.getElementById('output').value += perceptron.activate([0, 0])[0] + '\n';
+        document.getElementById('output').value += perceptron.activate([1, 0])[0] + '\n';
+        document.getElementById('output').value += perceptron.activate([0, 1])[0] + '\n';
+        document.getElementById('output').value += perceptron.activate([1, 1])[0] + '\n------\n';
+
+        console.log('Done!');
+    }
+
+    function getAndExemplars() {
+        return [
+            {
+                desired : [0],
+                inputs : [0, 0]
+            },
+            {
+                desired : [0],
+                inputs : [1, 0]
+            },
+            {
+                desired : [0],
+                inputs : [0, 1]
+            },
+            {
+                desired : [1],
+                inputs : [1, 1]
+            },
+        ];
+    }
+    </script>
+</head>
+<body>
+    <form>
+        <input onclick="javascript:train()" value="Click to train" type="button" /><br />
+        Results:<br />
+        <textarea id="output" rows="10" cols="50"></textarea>
+    </form>
+</body>
+</html>
